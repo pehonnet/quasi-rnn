@@ -37,6 +37,25 @@ def create_data(source_sents, target_sents):
     print("Y.shape =", Y.shape) 
     
     return X, Y, Sources, Targets
+
+def create_data_single(source_sents, input_reverse=False): 
+    char2idx, idx2char = load_vocab()
+    # This function allows to prepare data when only source is available
+    
+    X, Sources = [], []
+    for source_sent in source_sents:
+        x = [char2idx.get(char, 2) for char in source_sent + u"␃"] # 2: OOV, ␃: End of text
+        if input_reverse:
+            x = x[::-1][1:] + x[-1:]
+        if len(x) <= Hp.maxlen:
+            x += [0] * (Hp.maxlen - len(x)) # zero postpadding
+            
+            X.append(x) #; Y.append(y)
+            Sources.append(source_sent)
+    X = np.array(X, np.int32)
+    print("X.shape =", X.shape) 
+    
+    return X, Sources
        
 def load_train_data():
     de_sents = [line for line in codecs.open(Hp.de_train, 'r', 'utf-8').read().split("\n") if line and line[0] != "<"]
@@ -52,5 +71,27 @@ def load_test_data():
     de_sents = [remove_tags(line) for line in codecs.open(Hp.de_test, 'r', 'utf-8').read().split("\n") if line and line[:4] == "<seg"]
     en_sents = [remove_tags(line) for line in codecs.open(Hp.en_test, 'r', 'utf-8').read().split("\n") if line and line[:4] == "<seg"]
 
+    # For already preprocessed data, better to use:
+    #de_sents = [line for line in codecs.open(Hp.de_test, 'r', 'utf-8').read().split("\n") if line and line[0] != "<"]
+    #en_sents = [line for line in codecs.open(Hp.en_test, 'r', 'utf-8').read().split("\n") if line and line[0] != "<"]
+
+
     X, _, Sources, Targets = create_data(de_sents, en_sents)
     return X, Sources, Targets # (1064, 150)
+     
+
+# Function added to avoid loading ground truth data
+# (real translation where no gt available)
+def load_test_data_no_gt(input_reverse=False):
+    def remove_tags(line):
+        line = re.sub("<[^>]+>", "", line) 
+        return line.strip()
+
+    de_sents = [line for line in codecs.open(Hp.de_test, 'r', 'utf-8').read().split("\n") if line and line[0] != "<"]
+    
+    X, Sources = create_data_single(de_sents, input_reverse=input_reverse)
+    return X, Sources # (1064, 150)
+     
+
+
+
