@@ -21,6 +21,7 @@ Overall, we tried to follow the instructions in the Paper. Some major difference
 * STEP 1. Download [IWSLT 2016 German–English parallel corpus](https://wit3.fbk.eu/download.php?release=2016-01&type=texts&slang=de&tlang=en) and extract it to `corpora/` folder.
 * STEP 2. Run `train.py`.
 * STEP 3. Run `eval.py` to get the results for the test sentences.
+* STEP 3.bis Run `translate.py source_sentences.txt output_sentences.txt` to translate sentences when there is no reference translation.
 
 Or if you'd like to use the pretrained model,
 
